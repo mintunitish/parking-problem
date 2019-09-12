@@ -14,6 +14,7 @@ class ParkingLot
 
     private $capacity;
     private $slots = [];
+    private $vehicle = [];
 
     public static function instance($capacity)
     {
@@ -52,12 +53,20 @@ class ParkingLot
         return array_search(self::SLOT_FREE, $this->slots, true);
     }
 
-    public function setSlotFilled(int $slot) {
+    public function setSlotFilled(int $slot, string $registrationNo, string $color) {
         if (!$this->verifySlotNumber($slot)) {
             throw new ErrorException("Invalid Slot Number!", 422);
         }
 
+        $recorded = $this->recordVehicleDetails($slot, $registrationNo, $color);
+
+        if (!$recorded) {
+            return false;
+        }
+
         $this->slots[$slot] = self::SLOT_FILLED;
+
+        return true;
     }
 
     public function setSlotFree(int $slot) {
@@ -70,5 +79,25 @@ class ParkingLot
 
     public function isParkingLotCreated() {
         return ($this->capacity > 0);
+    }
+
+    private function recordVehicleDetails(int $slot, string $registrationNo, string $color) {
+        if (array_key_exists($registrationNo, $this->vehicle)) {
+            return false;
+        }
+
+        $this->vehicle[$registrationNo] = $color.'-'.$slot;
+
+        return true;
+    }
+
+    private function removeVehicleDetails($slot) {
+        $filteredArr = array_filter($this->vehicle, function ($value) use ($slot) {
+            return (explode('-', $value)[1] == $slot);
+        });
+
+        $key = array_keys($filteredArr);
+
+        unset($this->vehicle[$key[0]]);
     }
 }
