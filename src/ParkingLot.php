@@ -27,6 +27,8 @@ class ParkingLot
     }
 
     private function __construct($capacity) {
+        $this->capacity = $capacity;
+
         for ($i = 0; $i < $this->capacity; $i++) {
             $this->slots[$i] = self::SLOT_FREE;
         }
@@ -51,10 +53,22 @@ class ParkingLot
     }
 
     public function setSlotFilled(int $slot) {
+        if (!$this->verifySlotNumber($slot)) {
+            throw new ErrorException("Invalid Slot Number!", 422);
+        }
+
         $this->slots[$slot] = self::SLOT_FILLED;
     }
 
     public function setSlotFree(int $slot) {
+        if (!$this->verifySlotNumber($slot)) {
+            throw new ErrorException("Invalid Slot Number!", 422);
+        }
+
         $this->slots[$slot] = self::SLOT_FREE;
+    }
+
+    public function isParkingLotCreated() {
+        return ($this->capacity > 0);
     }
 }
